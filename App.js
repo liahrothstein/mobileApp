@@ -14,10 +14,12 @@ export default function App() {
 
   const [addTodo, setAddTodo] = useState('');
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState(data);
 
   const pushTodo = (TodoName) => {
     setAddTodo('');
     setActiveTodos(activeTodos + 1);
+    setFilteredData((todos) => todos.concat({ name: TodoName, status: 'active' }));
 
     return (
       setData((todos) => todos.concat({ name: TodoName, status: 'active' }))
@@ -29,12 +31,32 @@ export default function App() {
       setActiveTodos(activeTodos - 1);
       setDoneTodos(doneTodos + 1);
     }
+    setFilteredData((todo) => (todo.slice(0, index).concat({ name: todoName, status: 'complete' }).concat(todo.slice(index + 1))))
 
     return (
       setData((todo) => (todo.slice(0, index).concat({ name: todoName, status: 'complete' }).concat(todo.slice(index + 1))))
     );
   }
-  // console.log(data);
+
+  const filterAll = (todos) => {
+    setActiveButton(1);
+
+    return todos
+  }
+  const filterActive = (todos) => {
+    setActiveButton(2);
+
+    return (
+      setFilteredData(todos.filter((todo) => (todo.status === 'active')))
+    )
+  }
+  const filterDone = (todos) => {
+    setActiveButton(3);
+
+    return (
+      setFilteredData(todos.filter((todo) => (todo.status === 'complete')))
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -61,21 +83,21 @@ export default function App() {
           <Button
             title='Все'
             color={(activeButton === 1) ? '#17a2b8' : 'gray'}
-            onPress={() => (setActiveButton(1))} />
+            onPress={() => (filterAll(data))} />
           <Button
             title='Активные'
             color={(activeButton === 2) ? '#17a2b8' : 'gray'}
-            onPress={() => (setActiveButton(2))} />
+            onPress={() => (filterActive(data))} />
           <Button
             title='Выполненные'
             color={(activeButton === 3) ? '#17a2b8' : 'gray'}
-            onPress={() => (setActiveButton(3))} />
+            onPress={() => (filterDone(data))} />
         </View>
       </View>
       {/* Filter */}
 
       <ScrollView style={styles.todos}>
-        {data.map((e, i) => (
+        {((activeButton === 1) ? data : (activeButton === 2) ? filteredData : filteredData).map((e, i) => (
           <View style={styles.todo} key={i}>
             <Text style={styles.todoName}>{e.name}</Text>
             <View style={styles.todoButtons}>
