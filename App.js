@@ -1,6 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Image, TouchableHighlight, ScrollView } from 'react-native';
+import activeTodo from './assets/active.png';
+import completeTodo from './assets/complete.png';
+import deleteTodo from './assets/delete.png';
 
 export default function App() {
   const [activeTodos, setActiveTodos] = useState(0);
@@ -10,6 +13,28 @@ export default function App() {
   const [activeButton, setActiveButton] = useState(1);
 
   const [addTodo, setAddTodo] = useState('');
+  const [data, setData] = useState([]);
+
+  const pushTodo = (TodoName) => {
+    setAddTodo('');
+    setActiveTodos(activeTodos + 1);
+
+    return (
+      setData((todos) => todos.concat({ name: TodoName, status: 'active' }))
+    );
+  }
+
+  const activeToComplete = (status, index, todoName) => {
+    if (status === 'active') {
+      setActiveTodos(activeTodos - 1);
+      setDoneTodos(doneTodos + 1);
+    }
+
+    return (
+      setData((todo) => (todo.slice(0, index).concat({ name: todoName, status: 'complete' }).concat(todo.slice(index + 1))))
+    );
+  }
+  // console.log(data);
 
   return (
     <View style={styles.container}>
@@ -49,6 +74,23 @@ export default function App() {
       </View>
       {/* Filter */}
 
+      <ScrollView style={styles.todos}>
+        {data.map((e, i) => (
+          <View style={styles.todo} key={i}>
+            <Text style={styles.todoName}>{e.name}</Text>
+            <View style={styles.todoButtons}>
+              <TouchableHighlight onPress={() => (activeToComplete(e.status, i, e.name))}>
+                <Image source={(e.status === 'active') ? activeTodo : completeTodo} />
+              </TouchableHighlight>
+              <TouchableHighlight onPress={() => (setData((todo) => (todo.slice(0, i).concat(todo.slice(i + 1)))))} style={styles.deleteButton}>
+                <Image source={deleteTodo} />
+              </TouchableHighlight>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+      {/* Todos */}
+
       <View style={styles.addTodo}>
         <TextInput
           style={styles.addTodoInput}
@@ -57,6 +99,7 @@ export default function App() {
           onChangeText={setAddTodo} />
         <Button
           title='Добавить задачу'
+          onPress={() => (pushTodo(addTodo))}
           color={(addTodo !== '') ? '#17a2b8' : 'gray'}
           disabled={(addTodo === '') ? true : false} />
       </View>
@@ -75,7 +118,6 @@ const styles = StyleSheet.create({
     paddingLeft: '5%',
     paddingRight: '5%',
     marginTop: 50,
-    overflow: 'scroll'
   },
   amountText: {
     fontSize: 22,
@@ -115,6 +157,7 @@ const styles = StyleSheet.create({
   },
   filter: {
     marginTop: 20,
+    marginBottom: 8,
     width: '100%',
     height: 48,
     display: 'flex',
@@ -127,7 +170,8 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     width: '100%',
-    height: 40
+    height: 40,
+    marginBottom: '20%'
   },
   addTodoInput: {
     width: '45%',
@@ -138,5 +182,34 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
     borderStyle: 'solid',
     borderWidth: 1
+  },
+  todos: {
+    marginTop: 10,
+    height: '55%',
+    width: '100%',
+    // overflow: 'scroll'
+  },
+  todo: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderColor: 'gray',
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: '1%',
+    marginTop: 20
+  },
+  todoButtons: {
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  todoName: {
+    fontWeight: 500,
+    fontSize: 20
+  },
+  deleteButton: {
+    marginLeft: 5
   }
 });
